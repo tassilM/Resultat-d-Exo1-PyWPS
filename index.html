@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <title>Projet Web Mapping – Distances & Superficies</title>
+
+    <!-- Leaflet local -->
+    <link rel="stylesheet" href="leaflet.css" />
+    <script src="leaflet.js"></script>
+
+    <!-- Données JS (doivent commencer par : var wps1 = { ... }, etc.) -->
+    <script src="wps1.geojson"></script>
+    <script src="wps2.geojson"></script>
+    <script src="Route.geojson"></script>
+    <script src="Hopital.geojson"></script>
+    <script src="Station_Tram.geojson"></script>
+    
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f2f4f7;
+      }
+      .page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px 15px 40px 15px;
+      }
+      h1 { text-align: center; margin-bottom: 10px; }
+      .subtitle {
+        text-align: center; color: #555; margin-bottom: 25px; font-size: 14px;
+      }
+      .section-card {
+        background: #fff; border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        padding: 15px 15px 20px 15px;
+        margin-bottom: 25px;
+      }
+      .section-card h2 { margin: 0 0 8px 0; }
+      .section-desc { font-size: 13px; color: #555; margin-bottom: 8px; }
+      #map1, #map2 {
+        height: 420px;
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      #graph {
+        display: block; max-width: 100%; margin: 10px auto 0;
+        border-radius: 6px; border: 1px dashed #ccc;
+      }
+      .info {
+        padding: 6px 8px;
+        background: rgba(255,255,255,0.9);
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        border-radius: 5px;
+        font-size: 12px;
+      }
+      .info b { display: inline-block; min-width: 80px; }
+
+      /* Icônes hôpital / station (MAP 1) */
+      .marker-icon {
+        width: 26px; height: 26px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 26px;
+        color: #fff;
+        font-weight: bold;
+        font-size: 14px;
+        border: 2px solid rgba(0,0,0,0.4);
+      }
+      .icon-hopital {
+        background: #d9534f; /* rouge */
+      }
+      .icon-station {
+        background: #0275d8; /* bleu */
+      }
+
+      .leaflet-control-layers-expanded { font-size: 12px; }
+
+      /* Tableau section 3 */
+      .stats-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 13px;
+      }
+      .stats-table th,
+      .stats-table td {
+        border: 1px solid #ddd;
+        padding: 6px 8px;
+        text-align: center;
+      }
+      .stats-table thead {
+        background: #f5f5f5;
+        font-weight: bold;
+      }
+    </style>
+</head>
+<body>
+<div class="page">
+    <h1>Résultat Exo 1 du Projet Web Mapping – PyWPS </h1>
+    <div class="subtitle">
+      Deux Fonctions Spatiales &amp; Une Fonction Non Spatiale
+    </div>
+
+    <!-- ========== SECTION 1 ========== -->
+    <div class="section-card">
+      <h2>Fonction 1&nbsp;: Calcul de la plus proche station tram à chaque hopital suivant les routes</h2>
+      <p class="section-desc">
+        Survoler une ligne pour afficher le nom de l’hôpital, de la station
+        et la distance suivant la route. Les icônes <b>(rouge)</b>  indiquent
+        les hôpitaux et les icônes <b>(bleu)</b>  les stations.
+      </p>
+      <div id="map1"></div>
+    </div>
+
+    <!-- ========== SECTION 2 ========== -->
+    <div class="section-card">
+      <h2>Fonction 2&nbsp;:cartes choroplèthes décrivent la répartition des surfaces </h2>
+      <p class="section-desc">
+        La carte représente les superficies en <b>hectares</b> des bâtiments, jardins
+        et parkings. Utilisez le contrôle en haut à droite pour basculer entre les trois
+        cartes. Survoler un quartier met à jour le panneau d’information fixé en bas à gauche.
+      </p>
+      <div id="map2"></div>
+    </div>
+
+    <!-- ========== SECTION 3 ========== -->
+    <div class="section-card">
+      <h2>Fonction 3&nbsp;: Statistique de Casablanca </h2>
+      <p class="section-desc">
+        un tableau récapitulatif des statistiques globaux de la ville de Casablanca
+      </p>
+      <table id="stats-table" class="stats-table"></table>
+    </div>
+</div>
+
+<script>
+
+  /* ====== DONNÉES FONCTION 3 (issues de wps3.json) ====== */
+  var statsVille = [
+    {
+      "ville": "Casablanca",
+      "population_totale": 3093867.0,
+      "menages_totaux": 880384.0,
+      "taux_chomage_moyen": 18.123529411764707,
+      "ipm_moyen": 0.618235294117647,
+      "nombre_quartiers": 17
+    }
+  ];
+
+
+  /* ++++++ MAP 1 +++++++++   */
+
+  var map1 = L.map('map1');
+  
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map1);
+
+  // Icônes hôpital & station (DivIcons)
+  var hopitalIcon = L.divIcon({
+      className: 'marker-icon icon-hopital',
+      html: '',
+      iconSize: [7, 7],
+      iconAnchor: [13, 13]
+  });
+  var stationIcon = L.divIcon({
+      className: 'marker-icon icon-station',
+      html: '',
+      iconSize: [7, 7],
+      iconAnchor: [13, 13]
+  });
+
+  // Panneau info (bas droite) pour la ligne sélectionnée
+  var info1 = L.control({position: 'bottomright'});
+  info1.onAdd = function (map) {
+      this._div = L.DomUtil.create('div', 'info');
+      this._div.innerHTML = 'Survoler une ligne';
+      return this._div;
+  };
+  info1.update = function (props) {
+      if (!props) {
+          this._div.innerHTML = 'Survoler une ligne';
+      } else {
+          var d  = props.dist_route;
+          var d_txt = (typeof d === 'number') ? d.toFixed(0) + ' m' : (d || 'NA');
+          this._div.innerHTML =
+              '<b>Hôpital :</b> ' + (props.hospital_name || '-') + '<br/>' +
+              '<b>Station :</b> ' + (props.station_name  || '-') + '<br/>' +
+              '<b>Distance :</b> ' + d_txt;
+      }
+  };
+  info1.addTo(map1);
+
+  // Groupes pour points hôpitaux & stations
+  var hopLayer = L.layerGroup().addTo(map1);
+  var stationLayer = L.layerGroup().addTo(map1);
+
+  function highlightLine(e) {
+      var layer = e.target;
+      layer.setStyle({ weight: 5, color: '#ff0000' });
+      info1.update(layer.feature.properties);
+  }
+  function resetHighlightLine(e) {
+      geojsonLines.resetStyle(e.target);
+      info1.update(null);
+  }
+
+  // Lignes Hôpital–Station (à partir de wps1)
+  var geojsonLines = L.geoJSON(wps1, {
+      style: { color: '#41ab5d', weight: 3 },
+      onEachFeature: function (feature, layer) {
+          // évènements de survol
+          layer.on({
+              mouseover: highlightLine,
+              mouseout: resetHighlightLine
+          });
+
+          // Récupérer 1er et dernier point de la ligne comme Hôpital / Station
+          var latlngs = layer.getLatLngs();
+          if (latlngs.length >= 2) {
+              var first = latlngs[0];
+              var last  = latlngs[latlngs.length - 1];
+
+              L.marker(first, {icon: hopitalIcon, title: feature.properties.hospital_name})
+                .bindPopup('<b>Hôpital</b><br>' + (feature.properties.hospital_name || ''))
+                .addTo(hopLayer);
+
+              L.marker(last, {icon: stationIcon, title: feature.properties.station_name})
+                .bindPopup('<b>Station</b><br>' + (feature.properties.station_name || ''))
+                .addTo(stationLayer);
+          }
+      }
+  }).addTo(map1);
+
+  // Réseau routier (Route.geojson, déjà en CRS:84 ≈ WGS84)
+  var routesLayer = L.geoJSON(Route, {
+      style: { color: '#c51b8a', weight: 0.5 }
+  }).addTo(map1);
+
+  // Quartiers (contexte) à partir de wps2
+  var quartiersCtx = L.geoJSON(wps2, {
+      style: { color: '#444', weight: 3, fillOpacity: 0 }
+  }).addTo(map1);
+
+  // Ajuster le zoom sur l’ensemble
+  map1.fitBounds(geojsonLines.getBounds());
+
+  // Controle de couches MAP 1
+  L.control.layers(
+    null,
+    {
+      
+      
+      "Hôpitaux": hopLayer,
+      "Stations": stationLayer,
+      "Réseau routier": routesLayer,
+      "Quartiers": quartiersCtx,
+      "Lignes Hôpital–Station": geojsonLines
+
+    },
+    { collapsed: false }
+  ).addTo(map1);
+
+  
+    //***** MAP 2 *****
+
+
+  var map2 = L.map('map2');
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map2);
+
+  // Panneau info fixe bas-droite
+  var info2 = L.control({position: 'bottomright'});
+  info2.onAdd = function (map) {
+      this._div = L.DomUtil.create('div', 'info');
+      this.update();
+      return this._div;
+  };
+  info2.update = function (props) {
+      if (!props) {
+          this._div.innerHTML = 'Survoler un quartier';
+      } else {
+          var bat = props.Surf_Bat_ha     || 0;
+          var jar = props.Surf_Jardin_ha  || 0;
+          var par = props.Surf_Parking_ha || 0;
+          this._div.innerHTML =
+              '<b>' + (props.name_fr || props.name || 'Quartier') + '</b><br/>' +
+              '<b>Bâtiments :</b> ' + bat.toFixed(2) + ' ha<br/>' +
+              '<b>Jardins :</b> '   + jar.toFixed(2) + ' ha<br/>' +
+              '<b>Parkings :</b> '  + par.toFixed(2) + ' ha';
+      }
+  };
+  info2.addTo(map2);
+
+  // Fonctions de couleur basées sur les valeurs en hectares
+  function getColorBat(d) {
+      return d > 380 ? '#800026' :
+             d > 300 ? '#BD0026' :
+             d > 200 ? '#E31A1C' :
+             d > 100 ? '#FC4E2A' :
+             d > 50  ? '#FD8D3C' :
+                       '#FED976';
+  }
+  function getColorJar(d) {
+      return d > 170 ? '#005a32' :
+             d > 100 ? '#238b45' :
+             d > 50  ? '#41ab5d' :
+             d > 15  ? '#74c476' :
+             d > 5   ? '#a1d99b' :
+                       '#e5f5e0';
+  }
+  function getColorPar(d) {
+      if (d === 0) return '#f7fbff';
+      return d > 12 ? '#08306b' :
+             d > 7  ? '#2171b5' :
+             d > 3  ? '#6baed6' :
+             d > 0  ? '#c6dbef' :
+                      '#f7fbff';
+  }
+
+  function styleBat(feature) {
+      return {
+          fillColor: getColorBat(feature.properties.Surf_Bat_ha || 0),
+          color: '#555', weight: 1, fillOpacity: 0.7
+      };
+  }
+  function styleJar(feature) {
+      return {
+          fillColor: getColorJar(feature.properties.Surf_Jardin_ha || 0),
+          color: '#555', weight: 1, fillOpacity: 0.7
+      };
+  }
+  function stylePar(feature) {
+      return {
+          fillColor: getColorPar(feature.properties.Surf_Parking_ha || 0),
+          color: '#555', weight: 1, fillOpacity: 0.7
+      };
+  }
+
+  // survol / reset pour MAP 2
+  function highlightQuartier(e) {
+      var layer = e.target;
+      layer.setStyle({
+          weight: 3,
+          color: '#000',
+          fillOpacity: 0.9
+      });
+      info2.update(layer.feature.properties);
+  }
+  function resetQuartier(e, styleFn) {
+      var layer = e.target;
+      layer.setStyle(styleFn(layer.feature));
+      // On laisse l'info affichée, sinon appeler info2.update(); pour effacer.
+  }
+
+  // Helpers pour attacher les évènements avec le bon style
+  function makeOnEach(styleFn) {
+      return function(feature, layer) {
+          layer.on({
+              mouseover: function(e){ highlightQuartier(e); },
+              mouseout:  function(e){ resetQuartier(e, styleFn); }
+          });
+      };
+  }
+
+  // Création des trois couches (Bâtiments / Jardins / Parkings)
+  var batLayer = L.geoJSON(wps2, {
+      style: styleBat,
+      onEachFeature: makeOnEach(styleBat)
+  }).addTo(map2);
+
+  var jarLayer = L.geoJSON(wps2, {
+      style: styleJar,
+      onEachFeature: makeOnEach(styleJar)
+  });
+
+  var parLayer = L.geoJSON(wps2, {
+      style: stylePar,
+      onEachFeature: makeOnEach(stylePar)
+  });
+
+  // Contrôle de couches MAP 2
+  L.control.layers(
+    {
+      "Superficie Bâtiments (ha)": batLayer,
+      "Superficie Jardins (ha)":   jarLayer,
+      "Superficie Parkings (ha)":  parLayer
+    },
+    null,
+    { collapsed: false }
+  ).addTo(map2);
+
+  // Zoom sur les quartiers
+  map2.fitBounds(batLayer.getBounds());
+
+  /* ------------- Fonction 3 ------------ */
+
+  var table = document.getElementById('stats-table');
+  var stats = statsVille;
+
+  if (Array.isArray(stats) && stats.length > 0 && table) {
+      var thead = document.createElement('thead');
+      var tbody = document.createElement('tbody');
+
+      var headerRow = document.createElement('tr');
+      var headers = [
+        "Ville",
+        "Population totale",
+        "Ménages totaux",
+        "Taux de chômage moyen (%)",
+        "IPM moyen",
+        "Nombre de quartiers"
+      ];
+      headers.forEach(function(h) {
+        var th = document.createElement('th');
+        th.textContent = h;
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+
+      stats.forEach(function(rec) {
+        var tr = document.createElement('tr');
+
+        var tdVille = document.createElement('td');
+        tdVille.textContent = rec.ville;
+        tr.appendChild(tdVille);
+
+        var tdPop = document.createElement('td');
+        tdPop.textContent = rec.population_totale.toLocaleString('fr-FR');
+        tr.appendChild(tdPop);
+
+        var tdMen = document.createElement('td');
+        tdMen.textContent = rec.menages_totaux.toLocaleString('fr-FR');
+        tr.appendChild(tdMen);
+
+        var tdChom = document.createElement('td');
+        tdChom.textContent = rec.taux_chomage_moyen.toFixed(2);
+        tr.appendChild(tdChom);
+
+        var tdIpm = document.createElement('td');
+        tdIpm.textContent = rec.ipm_moyen.toFixed(3);
+        tr.appendChild(tdIpm);
+
+        var tdNbQ = document.createElement('td');
+        tdNbQ.textContent = rec.nombre_quartiers;
+        tr.appendChild(tdNbQ);
+
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(thead);
+      table.appendChild(tbody);
+  } else {
+      table.textContent = "Aucune statistique disponible.";
+  }
+</script>
+</body>
+</html>
+

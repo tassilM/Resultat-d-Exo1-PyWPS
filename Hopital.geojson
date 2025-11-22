@@ -1,0 +1,21 @@
+var Hopital ={
+"type": "FeatureCollection",
+"name": "Hopital",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::26191" } },
+"features": [
+{ "type": "Feature", "properties": { "name": "Centre consultation et traitement dentaires" }, "geometry": { "type": "Point", "coordinates": [ 293770.340539607801475, 332759.567866642668378 ] } },
+{ "type": "Feature", "properties": { "name": "Hôpital Sidi Othmane" }, "geometry": { "type": "Point", "coordinates": [ 298125.830928963434417, 331055.950097582070157 ] } },
+{ "type": "Feature", "properties": { "name": "Clinique les princes" }, "geometry": { "type": "Point", "coordinates": [ 293900.925241708057001, 334396.441990622319281 ] } },
+{ "type": "Feature", "properties": { "name": "Hospital CNSS" }, "geometry": { "type": "Point", "coordinates": [ 304970.631058023660444, 336705.755606043559965 ] } },
+{ "type": "Feature", "properties": { "name": "Clinical Les Fleurs" }, "geometry": { "type": "Point", "coordinates": [ 293658.489970219030511, 333705.689385034143925 ] } },
+{ "type": "Feature", "properties": { "name": "VITALIA MEDICAL" }, "geometry": { "type": "Point", "coordinates": [ 293686.757133319508284, 333553.220290741126519 ] } },
+{ "type": "Feature", "properties": { "name": "Medical 2000" }, "geometry": { "type": "Point", "coordinates": [ 293659.548636336461641, 333507.376694540085737 ] } },
+{ "type": "Feature", "properties": { "name": "MEDIMED" }, "geometry": { "type": "Point", "coordinates": [ 293708.891289860592224, 333372.058885218400974 ] } },
+{ "type": "Feature", "properties": { "name": "Kiné oum & co" }, "geometry": { "type": "Point", "coordinates": [ 300154.756449258420616, 328992.109539868077263 ] } },
+{ "type": "Feature", "properties": { "name": "Hopital Moulay Hassan" }, "geometry": { "type": "Point", "coordinates": [ 292598.942446747387294, 336280.777883740141988 ] } },
+{ "type": "Feature", "properties": { "name": "Hôpital Privé International de Casablanca" }, "geometry": { "type": "Point", "coordinates": [ 291962.732339567271993, 333785.26718968822388 ] } },
+{ "type": "Feature", "properties": { "name": "Akdital oasis" }, "geometry": { "type": "Point", "coordinates": [ 292931.201439741882496, 331402.686490880267229 ] } },
+{ "type": "Feature", "properties": { "name": "Clinique Attal" }, "geometry": { "type": "Point", "coordinates": [ 292151.006986995227635, 331193.061525385302957 ] } },
+{ "type": "Feature", "properties": { "name": "Clinique Socrate" }, "geometry": { "type": "Point", "coordinates": [ 291315.800975741585717, 333447.411509768513497 ] } }
+]
+}
