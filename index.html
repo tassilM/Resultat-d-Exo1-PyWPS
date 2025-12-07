@@ -16,128 +16,188 @@
     <script src="Station_Tram.geojson"></script>
     
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background: #f2f4f7;
-      }
-      .page {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px 15px 40px 15px;
-      }
-      h1 { text-align: center; margin-bottom: 10px; }
-      .subtitle {
-        text-align: center; color: #555; margin-bottom: 25px; font-size: 14px;
-      }
-      .section-card {
-        background: #fff; border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        padding: 15px 15px 20px 15px;
-        margin-bottom: 25px;
-      }
-      .section-card h2 { margin: 0 0 8px 0; }
-      .section-desc { font-size: 13px; color: #555; margin-bottom: 8px; }
-      #map1, #map2 {
-        height: 420px;
-        border-radius: 6px;
-        overflow: hidden;
-      }
-      #graph {
-        display: block; max-width: 100%; margin: 10px auto 0;
-        border-radius: 6px; border: 1px dashed #ccc;
-      }
-      .info {
-        padding: 6px 8px;
-        background: rgba(255,255,255,0.9);
-        box-shadow: 0 0 10px rgba(0,0,0,0.2);
-        border-radius: 5px;
-        font-size: 12px;
-      }
-      .info b { display: inline-block; min-width: 80px; }
+:root {
+  --bg-main: #02131f;
+  --bg-card: #031926;
+  --border-card: #063547;
+  --accent: #22c55e;
+  --accent-soft: #0f766e;
+  --accent-blue: #38bdf8;
+  --text-main: #e5f9ff;
+  --text-muted: #94a3b8;
+}
 
-      /* Icônes hôpital / station (MAP 1) */
-      .marker-icon {
-        width: 26px; height: 26px;
-        border-radius: 50%;
-        text-align: center;
-        line-height: 26px;
-        color: #fff;
-        font-weight: bold;
-        font-size: 14px;
-        border: 2px solid rgba(0,0,0,0.4);
-      }
-      .icon-hopital {
-        background: #d9534f; /* rouge */
-      }
-      .icon-station {
-        background: #0275d8; /* bleu */
-      }
+/* ===== Layout & typo ===== */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top left, #0b1120, var(--bg-main));
+  color: var(--text-main);
+}
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+h1 {
+  text-align: center;
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f9fafb;
+}
+.subtitle {
+  text-align: center;
+  color: var(--text-muted);
+  margin-bottom: 26px;
+  font-size: 13px;
+}
 
-      .leaflet-control-layers-expanded { font-size: 12px; }
+/* ===== Cartes / sections ===== */
+.section-card {
+  background: radial-gradient(circle at top left, #052436, var(--bg-card));
+  border-radius: 18px;
+  box-shadow: 0 18px 45px rgba(3, 105, 161, 0.5);
+  padding: 16px 18px 20px;
+  margin-bottom: 26px;
+  border: 1px solid var(--border-card);
+}
+.section-card h2 {
+  margin: 0 0 6px 0;
+  font-size: 17px;
+  color: #f9fafb;
+}
+.section-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+#map1, #map2 {
+  height: 420px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #020617;
+}
 
-      /* Tableau section 3 */
-      .stats-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-        font-size: 13px;
-      }
-      .stats-table th,
-      .stats-table td {
-        border: 1px solid #ddd;
-        padding: 6px 8px;
-        text-align: center;
-      }
-      .stats-table thead {
-        background: #f5f5f5;
-        font-weight: bold;
-      }
+/* ===== Panneaux d’info ===== */
+.info {
+  padding: 8px 10px;
+  background: rgba(3, 18, 28, 0.96);
+  box-shadow: 0 10px 25px rgba(8, 47, 73, 0.9);
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--text-main);
+  border: 1px solid #0f766e;
+}
+.info b {
+  display: inline-block;
+  min-width: 90px;
+  color: var(--accent-blue);
+}
+
+/* ===== Icônes marqueurs ===== */
+.marker-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 22px;
+  color: #020617;
+  font-weight: 600;
+  font-size: 13px;
+  border: 2px solid #020617;
+  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.9);
+}
+.icon-hopital {
+  background: #eab308;       /* jaune vif */
+}
+.icon-station {
+  background: #22c55e;       /* vert émeraude */
+}
+
+/* ===== Contrôles Leaflet ===== */
+.leaflet-control-layers-expanded {
+  font-size: 12px;
+  background: rgba(3, 18, 28, 0.96) !important;
+  color: var(--text-main);
+  border: 1px solid #0f766e !important;
+  box-shadow: 0 12px 30px rgba(8, 47, 73, 0.9);
+}
+.leaflet-control-layers-expanded label {
+  color: var(--text-main);
+}
+
+/* ===== Tableau stats ===== */
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-main);
+}
+.stats-table th,
+.stats-table td {
+  border: 1px solid #022c3a;
+  padding: 6px 8px;
+  text-align: center;
+}
+.stats-table th {
+  background: #022c3a;
+  color: #e0f2fe;
+}
+.stats-table tr:nth-child(even) td {
+  background: #020617;
+}
+.stats-table tr:nth-child(odd) td {
+  background: #031926;
+}
     </style>
 </head>
 <body>
 <div class="page">
-    <h1>Résultat Exo 1 du Projet Web Mapping – PyWPS </h1>
+    <h1>Résultat Exo 1 du Projet Web Mapping – PyWPS</h1>
     <div class="subtitle">
-      Deux Fonctions Spatiales &amp; Une Fonction Non Spatiale
+      Deux fonctions spatiales &amp; une fonction non spatiale – Thème bleu &amp; vert
     </div>
 
     <!-- ========== SECTION 1 ========== -->
     <div class="section-card">
-      <h2>Fonction 1&nbsp;: Calcul de la plus proche station tram à chaque hopital suivant les routes</h2>
+      <h2>Fonction 1 : Calcul de la plus proche station tram à chaque hôpital suivant les routes</h2>
       <p class="section-desc">
-        Survoler une ligne pour afficher le nom de l’hôpital, de la station
-        et la distance suivant la route. Les icônes <b>(rouge)</b>  indiquent
-        les hôpitaux et les icônes <b>(bleu)</b>  les stations.
+        Survolez une ligne pour afficher le nom de l’hôpital, de la station
+        et la distance suivant la route. Les icônes <b>jaunes</b> indiquent
+        les hôpitaux et les icônes <b>vertes</b> les stations.
       </p>
       <div id="map1"></div>
     </div>
 
     <!-- ========== SECTION 2 ========== -->
     <div class="section-card">
-      <h2>Fonction 2&nbsp;:cartes choroplèthes décrivent la répartition des surfaces </h2>
+      <h2>Fonction 2 : Cartes choroplèthes des superficies par quartier</h2>
       <p class="section-desc">
         La carte représente les superficies en <b>hectares</b> des bâtiments, jardins
         et parkings. Utilisez le contrôle en haut à droite pour basculer entre les trois
-        cartes. Survoler un quartier met à jour le panneau d’information fixé en bas à gauche.
+        indicateurs. Le panneau d’information en bas à droite affiche les valeurs
+        du quartier survolé.
       </p>
       <div id="map2"></div>
     </div>
 
     <!-- ========== SECTION 3 ========== -->
     <div class="section-card">
-      <h2>Fonction 3&nbsp;: Statistique de Casablanca </h2>
+      <h2>Fonction 3 : Statistiques globales de la ville de Casablanca</h2>
       <p class="section-desc">
-        un tableau récapitulatif des statistiques globaux de la ville de Casablanca
+        Ce tableau résume les indicateurs calculés à partir des quartiers : population totale,
+        ménages totaux, taux de chômage moyen et IPM moyen.
       </p>
-      <table id="stats-table" class="stats-table"></table>
+      <table class="stats-table" id="statsTable"></table>
     </div>
 </div>
 
 <script>
-
-  /* ====== DONNÉES FONCTION 3 (issues de wps3.json) ====== */
+  /* ====== DONNÉES FONCTION 3 ====== */
   var statsVille = [
     {
       "ville": "Casablanca",
@@ -149,30 +209,31 @@
     }
   ];
 
-
-  /* ++++++ MAP 1 +++++++++   */
+  /* ***** MAP 1 ***** */
 
   var map1 = L.map('map1');
-  
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map1);
+  L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    {
+      attribution: 'Tiles &copy; Esri World Imagery'
+    }
+  ).addTo(map1);
 
-  // Icônes hôpital & station (DivIcons)
+  // Icônes hôpital & station
   var hopitalIcon = L.divIcon({
       className: 'marker-icon icon-hopital',
       html: '',
       iconSize: [7, 7],
-      iconAnchor: [13, 13]
+      iconAnchor: [11, 11]
   });
   var stationIcon = L.divIcon({
       className: 'marker-icon icon-station',
       html: '',
       iconSize: [7, 7],
-      iconAnchor: [13, 13]
+      iconAnchor: [11, 11]
   });
 
-  // Panneau info (bas droite) pour la ligne sélectionnée
+  // Panneau info bas droite (MAP 1)
   var info1 = L.control({position: 'bottomright'});
   info1.onAdd = function (map) {
       this._div = L.DomUtil.create('div', 'info');
@@ -193,13 +254,9 @@
   };
   info1.addTo(map1);
 
-  // Groupes pour points hôpitaux & stations
-  var hopLayer = L.layerGroup().addTo(map1);
-  var stationLayer = L.layerGroup().addTo(map1);
-
   function highlightLine(e) {
       var layer = e.target;
-      layer.setStyle({ weight: 5, color: '#ff0000' });
+      layer.setStyle({ weight: 7, color: '#38bdf8' });
       info1.update(layer.feature.properties);
   }
   function resetHighlightLine(e) {
@@ -207,72 +264,109 @@
       info1.update(null);
   }
 
-  // Lignes Hôpital–Station (à partir de wps1)
+  // Groupes pour les marqueurs créés à partir des lignes
+  var hopLayerFromLines     = L.layerGroup().addTo(map1);
+  var stationLayerFromLines = L.layerGroup().addTo(map1);
+
+  // Lignes Hôpital–Station (wps1) + création des marqueurs aux extrémités
   var geojsonLines = L.geoJSON(wps1, {
-      style: { color: '#00faf6', weight: 5 },
+      style: { color: '#22c55e', weight: 5, opacity: 0.95 },
       onEachFeature: function (feature, layer) {
-          // évènements de survol
           layer.on({
               mouseover: highlightLine,
               mouseout: resetHighlightLine
           });
 
-          // Récupérer 1er et dernier point de la ligne comme Hôpital / Station
           var latlngs = layer.getLatLngs();
           if (latlngs.length >= 2) {
               var first = latlngs[0];
               var last  = latlngs[latlngs.length - 1];
 
-              L.marker(first, {icon: hopitalIcon, title: feature.properties.hospital_name})
-                .bindPopup('<b>Hôpital</b><br>' + (feature.properties.hospital_name || ''))
-                .addTo(hopLayer);
+              var p = feature.properties || {};
+              var hName = p.hospital_name || "Hôpital";
+              var sName = p.station_name  || "Station";
 
-              L.marker(last, {icon: stationIcon, title: feature.properties.station_name})
-                .bindPopup('<b>Station</b><br>' + (feature.properties.station_name || ''))
-                .addTo(stationLayer);
+              L.marker(first, {icon: hopitalIcon, title: hName})
+                .bindPopup("<b>Hôpital</b><br>" + hName)
+                .addTo(hopLayerFromLines);
+
+              L.marker(last, {icon: stationIcon, title: sName})
+                .bindPopup("<b>Station</b><br>" + sName)
+                .addTo(stationLayerFromLines);
           }
       }
   }).addTo(map1);
 
-  // Réseau routier (Route.geojson, déjà en CRS:84 ≈ WGS84)
-  var routesLayer = L.geoJSON(Route, {
-      style: { color: '#c51b8a', weight: 0.5 }
-  }).addTo(map1);
-
-  // Quartiers (contexte) à partir de wps2
+  // Quartiers en contours (polylignes uniquement) -> DANS le contrôle mais PAS affichés par défaut
   var quartiersCtx = L.geoJSON(wps2, {
-      style: { color: '#444', weight: 3, fillOpacity: 0 }
-  }).addTo(map1);
+      style: {
+          color: '#0ea5e9',
+          weight: 2,
+          fillOpacity: 0,
+          dashArray: '4 2'
+      }
+  });
+  // pas de .addTo(map1) ici
 
-  // Ajuster le zoom sur l’ensemble
+  // Couches complètes (optionnelles) si Hopital / Station_Tram existent
+  var hopAllLayer = null;
+  if (window.Hopital) {
+      hopAllLayer = L.geoJSON(window.Hopital, {
+          pointToLayer: function(feature, latlng) {
+              var p = feature.properties || {};
+              var name = p.hospital_name || p.NOM || p.Nom || p.name || p.Nom_Hop || "Hôpital";
+              return L.marker(latlng, {
+                  icon: hopitalIcon,
+                  title: name
+              }).bindPopup("<b>Hôpital (couche)</b><br>" + name);
+          }
+      }).addTo(map1);
+  }
+
+  var stationAllLayer = null;
+  if (window.Station_Tram) {
+      stationAllLayer = L.geoJSON(window.Station_Tram, {
+          pointToLayer: function(feature, latlng) {
+              var p = feature.properties || {};
+              var name = p.station_name || p.NOM || p.name || p.Nom_station || "Station";
+              return L.marker(latlng, {
+                  icon: stationIcon,
+                  title: name
+              }).bindPopup("<b>Station (couche)</b><br>" + name);
+          }
+      }).addTo(map1);
+  }
+
+  // Zoom sur toutes les lignes
   map1.fitBounds(geojsonLines.getBounds());
 
-  // Controle de couches MAP 1
-  L.control.layers(
-    null,
-    {
-      
-      
-      "Hôpitaux": hopLayer,
-      "Stations": stationLayer,
-      "Réseau routier": routesLayer,
-      "Quartiers": quartiersCtx,
-      "Lignes Hôpital–Station": geojsonLines
+  // Contrôle couches MAP 1
+  var overlays1 = {
+    "Hôpitaux (WPS)": hopLayerFromLines,
+    "Stations tram (WPS)": stationLayerFromLines,
+    "Lignes Hôpital–Station": geojsonLines,
+    "Quartiers (contours)": quartiersCtx
+  };
+  if (hopAllLayer) {
+    overlays1["Hôpitaux (couche complète)"] = hopAllLayer;
+  }
+  if (stationAllLayer) {
+    overlays1["Stations tram (couche complète)"] = stationAllLayer;
+  }
 
-    },
-    { collapsed: false }
-  ).addTo(map1);
+  L.control.layers(null, overlays1, { collapsed: false }).addTo(map1);
 
-  
-    //***** MAP 2 *****
-
+  /* ***** MAP 2 ***** */
 
   var map2 = L.map('map2');
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map2);
+  L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    {
+      attribution: 'Tiles &copy; Esri World Imagery'
+    }
+  ).addTo(map2);
 
-  // Panneau info fixe bas-droite
+  // Panneau info MAP 2
   var info2 = L.control({position: 'bottomright'});
   info2.onAdd = function (map) {
       this._div = L.DomUtil.create('div', 'info');
@@ -295,68 +389,74 @@
   };
   info2.addTo(map2);
 
-  // Fonctions de couleur basées sur les valeurs en hectares
+  // Palettes cohérentes bleu–vert
   function getColorBat(d) {
-      return d > 380 ? '#800026' :
-             d > 300 ? '#BD0026' :
-             d > 200 ? '#E31A1C' :
-             d > 100 ? '#FC4E2A' :
-             d > 50  ? '#FD8D3C' :
-                       '#FED976';
+      return d > 380 ? '#082f49' :
+             d > 300 ? '#0ea5e9' :
+             d > 200 ? '#38bdf8' :
+             d > 100 ? '#67e8f9' :
+             d > 50  ? '#a5f3fc' :
+                       '#ecfeff';
   }
   function getColorJar(d) {
-      return d > 170 ? '#005a32' :
-             d > 100 ? '#238b45' :
-             d > 50  ? '#41ab5d' :
-             d > 15  ? '#74c476' :
-             d > 5   ? '#a1d99b' :
-                       '#e5f5e0';
+      return d > 170 ? '#064e3b' :
+             d > 100 ? '#047857' :
+             d > 50  ? '#10b981' :
+             d > 15  ? '#34d399' :
+             d > 5   ? '#6eead7' :
+                       '#ecfdf5';
   }
   function getColorPar(d) {
-      if (d === 0) return '#f7fbff';
-      return d > 12 ? '#08306b' :
-             d > 7  ? '#2171b5' :
-             d > 3  ? '#6baed6' :
-             d > 0  ? '#c6dbef' :
-                      '#f7fbff';
+      if (d === 0) return '#f9fafb';
+      return d > 12 ? '#083344' :
+             d > 7  ? '#0f766e' :
+             d > 3  ? '#14b8a6' :
+             d > 0  ? '#5eead4' :
+                      '#f9fafb';
   }
 
   function styleBat(feature) {
       return {
-          fillColor: getColorBat(feature.properties.Surf_Bat_ha || 0),
-          color: '#555', weight: 1, fillOpacity: 0.7
+          fillColor: getColorBat(feature.properties.Surf_Bat_ha),
+          weight: 1,
+          opacity: 1,
+          color: '#020617',
+          fillOpacity: 0.9
       };
   }
   function styleJar(feature) {
       return {
-          fillColor: getColorJar(feature.properties.Surf_Jardin_ha || 0),
-          color: '#555', weight: 1, fillOpacity: 0.7
+          fillColor: getColorJar(feature.properties.Surf_Jardin_ha),
+          weight: 1,
+          opacity: 1,
+          color: '#020617',
+          fillOpacity: 0.9
       };
   }
   function stylePar(feature) {
       return {
-          fillColor: getColorPar(feature.properties.Surf_Parking_ha || 0),
-          color: '#555', weight: 1, fillOpacity: 0.7
+          fillColor: getColorPar(feature.properties.Surf_Parking_ha),
+          weight: 1,
+          opacity: 1,
+          color: '#020617',
+          fillOpacity: 0.9
       };
   }
 
-  // survol / reset pour MAP 2
   function highlightQuartier(e) {
       var layer = e.target;
       layer.setStyle({
           weight: 3,
-          color: '#000',
-          fillOpacity: 0.9
+          color: '#e0f2fe',
+          fillOpacity: 0.95
       });
       info2.update(layer.feature.properties);
   }
   function resetQuartier(e, styleFn) {
       var layer = e.target;
       layer.setStyle(styleFn(layer.feature));
-      // On laisse l'info affichée, sinon appeler info2.update(); pour effacer.
   }
 
-  // Helpers pour attacher les évènements avec le bon style
   function makeOnEach(styleFn) {
       return function(feature, layer) {
           layer.on({
@@ -366,7 +466,6 @@
       };
   }
 
-  // Création des trois couches (Bâtiments / Jardins / Parkings)
   var batLayer = L.geoJSON(wps2, {
       style: styleBat,
       onEachFeature: makeOnEach(styleBat)
@@ -382,26 +481,19 @@
       onEachFeature: makeOnEach(stylePar)
   });
 
-  // Contrôle de couches MAP 2
-  L.control.layers(
-    {
-      "Superficie Bâtiments (ha)": batLayer,
-      "Superficie Jardins (ha)":   jarLayer,
-      "Superficie Parkings (ha)":  parLayer
-    },
-    null,
-    { collapsed: false }
-  ).addTo(map2);
+  var baseMaps  = {};
+  var overlayMaps = {
+      "Surfaces Bâtiments (ha)": batLayer,
+      "Surfaces Jardins (ha)":   jarLayer,
+      "Surfaces Parkings (ha)":  parLayer
+  };
 
-  // Zoom sur les quartiers
+  L.control.layers(baseMaps, overlayMaps, {collapsed: false}).addTo(map2);
   map2.fitBounds(batLayer.getBounds());
 
-  /* ------------- Fonction 3 ------------ */
-
-  var table = document.getElementById('stats-table');
-  var stats = statsVille;
-
-  if (Array.isArray(stats) && stats.length > 0 && table) {
+  /* ***** TABLEAU STATISTIQUES (FONCTION 3) ***** */
+  var table = document.getElementById('statsTable');
+  if (statsVille && statsVille.length > 0) {
       var thead = document.createElement('thead');
       var tbody = document.createElement('tbody');
 
@@ -410,7 +502,7 @@
         "Ville",
         "Population totale",
         "Ménages totaux",
-        "Taux de chômage moyen (%)",
+        "Taux de chômage moyen",
         "IPM moyen",
         "Nombre de quartiers"
       ];
@@ -421,7 +513,7 @@
       });
       thead.appendChild(headerRow);
 
-      stats.forEach(function(rec) {
+      statsVille.forEach(function(rec) {
         var tr = document.createElement('tr');
 
         var tdVille = document.createElement('td');
@@ -429,16 +521,16 @@
         tr.appendChild(tdVille);
 
         var tdPop = document.createElement('td');
-        tdPop.textContent = rec.population_totale.toLocaleString('fr-FR');
+        tdPop.textContent = Math.round(rec.population_totale);
         tr.appendChild(tdPop);
 
         var tdMen = document.createElement('td');
-        tdMen.textContent = rec.menages_totaux.toLocaleString('fr-FR');
+        tdMen.textContent = Math.round(rec.menages_totaux);
         tr.appendChild(tdMen);
 
-        var tdChom = document.createElement('td');
-        tdChom.textContent = rec.taux_chomage_moyen.toFixed(2);
-        tr.appendChild(tdChom);
+        var tdTch = document.createElement('td');
+        tdTch.textContent = rec.taux_chomage_moyen.toFixed(2) + " %";
+        tr.appendChild(tdTch);
 
         var tdIpm = document.createElement('td');
         tdIpm.textContent = rec.ipm_moyen.toFixed(3);
@@ -459,5 +551,3 @@
 </script>
 </body>
 </html>
-
-
